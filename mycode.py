@@ -63,11 +63,11 @@ def get_content(url):#获取网页源码
     }
     s.headers.update(headers)
     flag=0
-    while flag<10:
+    while flag<3:
         starttime=time.time()
         try:
             
-            html=s.get(url=url)
+            html=s.get(url=url,timeout=200)
 
             return html.text,html.content
         except:
@@ -188,7 +188,7 @@ pprint(page_index)
 pprint(oldurl)
 
 
-start_timea=localtime(time())
+start_timea=localtime(start_time)
 mywrite_line('run_logs.txt','\n\n\n\n\n-----------------------%d/%d/%d  %d:%d:%d---------------------------------'%(
     start_timea.tm_year,start_timea.tm_mon,start_timea.tm_mday,start_timea.tm_hour,start_timea.tm_min,start_timea.tm_sec))
 # 创建新线程
