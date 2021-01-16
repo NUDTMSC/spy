@@ -5,7 +5,7 @@ import time
 import os
 from mycode import *
 maxthread=10
-root_dir='D:\\WMX\\小说\\魔禁插画test\\'
+root_dir='D:\\WMX\\小说\\魔禁插画test1\\'
 mkdir(root_dir)
 lock=threading.Lock()
 thread_count=0
@@ -64,7 +64,8 @@ def save_picpage(threadName):
                 mywrite_line(dirname+'\\jpgpage.txt',jpg_page)
             mywrite_line(dirname+'\\jpgpage.txt','end')
             print(threadName+'----目录：%s ----图片页面地址全部写入完成，总用时：%f'%(dirname,time.time()-threadstart_time))
-        
+        else:
+            print(threadName+'----目录：%s ----图片页面地址已存在'%(dirname))
         timeout_flag=0
         while 1:
             with open(dirname+'\\code.py','w',encoding='utf-8') as file:
@@ -76,7 +77,7 @@ def save_picpage(threadName):
                 time.sleep(1)
             if os.path.exists(dirname+'\\timeout.txt') and timeout_flag<3:
                 timeout_flag+=1
-                print(dirname+'  下载超时%d次，总耗时时%f'%(timeout_flag,time.time()-start1))
+                print(dirname+'  下载超时%d次，总耗时%f'%(timeout_flag,time.time()-start1))
             else:
                 break
 
@@ -86,6 +87,10 @@ def save_picpage(threadName):
             print(dirname+'  下载完成，用时%f'%(time.time()-start1))
         else:
             print(dirname+'  下载失败，总用时%f'%(time.time()-start1))
+            lock.acquire()
+            with open(root_dir+'失败.txt','a+') as file:
+                file.write(dirname+'\n')
+            lock.release()
         illu=get_illu()
 class myThread (threading.Thread):
     def __init__(self, threadID, name):
@@ -119,8 +124,10 @@ for t in threads:
     lock.release()
     t.start()
 #等待线程结束
-for t in threads:
-    t.join()
+while thread_count>0:
+    print('剩余%d个线程，已运行%f秒'%(thread_count,time.time()-start_time))
+    time.sleep(60)
+    
 
 print ("退出主线程")
 mywrite_line(root_dir+'logs.txt','用时：%f'%(time.time()-start_time))

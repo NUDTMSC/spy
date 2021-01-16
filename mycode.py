@@ -9,7 +9,7 @@ import sys
 
 start_time=time()
 maxthread=10            #最大线程数
-run_timeout=600         #最长运行时间
+run_timeout=60         #最长运行时间
 lock=threading.Lock()   #线程锁
 thread_count=0          #正在运行的线程数
 exitFlag = 0
@@ -70,7 +70,7 @@ def get_content(url):#获取网页源码
         starttime=time.time()
         try:
             
-            html=s.get(url=url,timeout=200)
+            html=s.get(url=url)
 
             return html.text,html.content
         except:
