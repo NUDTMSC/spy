@@ -1,12 +1,15 @@
 mycode=r'''
+
 # coding=utf-8
 import threading
 from time import time,sleep,localtime
 from pprint import pprint
 import os
+import sys
 
 start_time=time()
 maxthread=10            #最大线程数
+run_timeout=600         #最长运行时间
 lock=threading.Lock()   #线程锁
 thread_count=0          #正在运行的线程数
 exitFlag = 0
@@ -186,7 +189,10 @@ page_index = read_page_index()
 oldurl=read_oldurl()
 pprint(page_index)
 pprint(oldurl)
-
+try:
+    os.system('del '+'timeout.txt')
+except:
+    print('')
 
 start_timea=localtime(start_time)
 mywrite_line('run_logs.txt','\n\n\n\n\n-----------------------%d/%d/%d  %d:%d:%d---------------------------------'%(
@@ -201,14 +207,21 @@ for t in threads:
     lock.acquire()
     thread_count+=1
     lock.release()
+    t.setDaemon(True)
     t.start()
-#等待线程结束
-for t in threads:
-    t.join()
+
+timeout_flag=0
+while timeout_flag<run_timeout and thread_count>0:
+    sleep(1)
+    timeout_flag+=1
+if(timeout_flag>=run_timeout):
+    mywrite_line('timeout.txt','剩余线程：%d'%thread_count)
+    mywrite_line('run_logs.txt','运行超时，剩余线程：%d'%thread_count)
 
 mywrite_line('run_logs.txt',"退出主线程"+'\n总用时%f'%(time()-start_time))
 print("退出主线程")
 print('总用时%f'%(time()-start_time))
+
 '''
 
 

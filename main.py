@@ -6,13 +6,24 @@ import os
 from mycode import *
 maxthread=10
 root_dir='D:\\WMX\\小说\\魔禁插画test\\'
-
+mkdir(root_dir)
 lock=threading.Lock()
 thread_count=0
 exitFlag = 0
-il_index = get_illustration()
 
+if not os.path.exists(root_dir+'\\illustration.txt'):
+    il_index = get_illustration()
+    for illustration in il_index:
+        mywrite_line(root_dir+'\\illustration.txt',illustration)
+else:
+    il_index=[]
+    with open(root_dir+'\\illustration.txt','r') as file:
+        illustrations=list(file)
+    for illustration in illustrations:
+        il_index.append(illustration[:-1])
+    
 pprint(il_index)
+print(len(il_index))
 
 illu_i=0
 
@@ -53,15 +64,28 @@ def save_picpage(threadName):
                 mywrite_line(dirname+'\\jpgpage.txt',jpg_page)
             mywrite_line(dirname+'\\jpgpage.txt','end')
             print(threadName+'----目录：%s ----图片页面地址全部写入完成，总用时：%f'%(dirname,time.time()-threadstart_time))
-        with open(dirname+'\\code.py','w',encoding='utf-8') as file:
-            file.write(mycode)
-        with open(dirname+'\\bat.bat','w',encoding='utf-8') as file:
-            file.write(mybat)
-        os.system('start '+dirname+'\\bat.bat')
-        while os.path.exists(dirname+'\\code.py'):
-            time.sleep(1)
+        
+        timeout_flag=0
+        while 1:
+            with open(dirname+'\\code.py','w',encoding='utf-8') as file:
+                file.write(mycode)
+            with open(dirname+'\\bat.bat','w',encoding='utf-8') as file:
+                file.write(mybat)
+            os.system('start '+dirname+'\\bat.bat')
+            while os.path.exists(dirname+'\\code.py'):
+                time.sleep(1)
+            if os.path.exists(dirname+'\\timeout.txt') and timeout_flag<3:
+                timeout_flag+=1
+                print(dirname+'  下载超时%d次，总耗时时%f'%(timeout_flag,time.time()-start1))
+            else:
+                break
+
+
         os.system('del '+dirname+'\\bat.bat')
-        print(dirname+'  下载完成，用时%f'%(time.time()-start1))
+        if not os.path.exists(dirname+'\\timeout.txt'):
+            print(dirname+'  下载完成，用时%f'%(time.time()-start1))
+        else:
+            print(dirname+'  下载失败，总用时%f'%(time.time()-start1))
         illu=get_illu()
 class myThread (threading.Thread):
     def __init__(self, threadID, name):
